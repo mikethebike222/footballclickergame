@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Football Clicker Game</title>
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.js"></script>
+    <style>
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Football Clicker Game</h1>
+    <script type="text/javascript">
+
+        var config = {
+            type: Phaser.AUTO,
+            width: 1200,
+            height: 579,
+            physics: {
+                default: 'arcade',
+                arcade: {
+                    gravity: { y: 0 },
+                    debug: false
+                }
+            },
+            scene: {
+                preload: preload,
+                endGame: endGame,
+                create: create,
+                update: update
+            }
+        };
+
+        var game = new Phaser.Game(config);
+
+        var field;
+        var player;
+        var spacebar;
+        var yardMarkings = [];
+        var timer;
+        var timeLeft;
+        var score;
+        var scoreText;
+        var timerText;
+
+        function preload() {
+            this.load.image('field', 'assets/field.png');
+            this.load.spritesheet('player', 'assets/doge.png', { frameWidth: 200, frameHeight: 200 });
+        }
+
+        function create() {
+          
+            field = this.add.tileSprite(0, 0, 1200, 579, 'field');
+            field.setOrigin(0, 0);
+
+     
+            player = this.physics.add.sprite(50, 290, 'player');
+            player.setOrigin(0.5, 0.5);
+          
+            spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+
+      
+            timeLeft = 10;
+            timerText = this.add.text(1190, 16, 'Time: ' + timeLeft, { fontSize: '32px', fill: '#000' });
+            timerText.setOrigin(1, 0);
+            timer = this.time.addEvent({
+                delay: 1000,
+                callback: updateTime,
+                callbackScope: this,
+                loop: true
+            });
+
+         
+            score = 0;
+            scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#000' });
+
+            endGameText = this.add.text(400, 200, '', { fontSize: '50px', fill: '#000' });
+
+        }
+
+        function update() {
+            
+            if (Phaser.Input.Keyboard.JustDown(spacebar)) {
+                player.x += 1040 / 50;
+                checkForEndOfGame();
+                updateScore();
+            }
+        }
+
+        function checkForEndOfGame() {
+            
+            console.log("timeleft ", timeLeft, " score ", score);
+            if (timeLeft <= 0 || score >= 500) {
+                setTimeout(endGame, 10); 
+            }
+        }
+
+        function updateTime() {
+            
+            timeLeft--;
+            timerText.setText('Time: ' + timeLeft);
+            if (timeLeft <= 0) {
+                timerText.setColor('#f00'); 
+                endGame();
+            }
+        }
+
+        function updateScore() {
+            
+            if (score < 500) {
+                score += 10;
+            }
+            scoreText.setText('Score: ' + score);
+        }
+
+        function endGame() {
+           
+            console.log("End game called");
+            console.log("timeleft ", timeLeft, " score ", score);
+
+            timer.remove(false);
+            spacebar.enabled = false;
+
+           
+            var endText = 'Game Over!\nFinal Score: ' + score;
+            if (score >= 500) {
+                endText += '\nYou Win!!!';
+            }
+            if (timeLeft <= 0 && score < 500) {
+                endText += '\nTimes Up, You Lose!';
+            }
+            endGameText.setText(endText);
+        }
+
+    </script>
+</body>
+</html>
